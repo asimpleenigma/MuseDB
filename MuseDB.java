@@ -5,11 +5,17 @@ package musedb;
 import javafx.application.Application;
 import javafx.scene.*;
 import javafx.scene.control.Button;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 //import java.beans.EventHandler;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 //import java.awt.event.ActionEvent;
+
+//import java.nio.file.Files;
+import java.io.File;
+import javafx.stage.FileChooser;
+import java.util.*;
 
 
 /**
@@ -19,16 +25,45 @@ import javafx.event.EventHandler;
 
 public class MuseDB extends Application {
     Player player;
+    VBox song_listing;
     
+    public static void main(String[] args) {
+        MuseDB muse = new MuseDB();
+        muse.launch();
+    }
     
     public void start(Stage stage) {
         
+        // *** Initialize Model Classes *** //
+        player = new Player();
+        
+        
         stage.setTitle("MuseDB");
         
-        Group root = new Group();
+        BorderPane root = new BorderPane();
         
         
         
+        VBox control_panel = new VBox();
+        root.setLeft(control_panel);
+        
+        song_listing = new VBox();
+        root.setCenter(song_listing);
+        
+        // **** File Import *** // 
+        FileChooser file_chooser = new FileChooser();
+        Button import_button = new Button();
+        import_button.setText("Import");
+        import_button.setOnAction(
+            new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(final ActionEvent e) {
+                    List<File> list = file_chooser.showOpenMultipleDialog(stage);
+                    FileCoordinator.importFiles(list);
+                    listSongs(list);
+                }
+            });
+        control_panel.getChildren().add(import_button);
         
         //******* Test Player *******/
         
@@ -47,11 +82,11 @@ public class MuseDB extends Application {
             }
         });
         
-        root.getChildren().add(play_button);
+        control_panel.getChildren().add(play_button);
         
         // Test playing music
-        player = new Player();
-        player.selectSong();
+        
+        //player.selectSong();
        // player.play();
         
         // Test moving files
@@ -64,9 +99,27 @@ public class MuseDB extends Application {
         
     }
     
-    public static void main(String[] args) {
-        MuseDB muse = new MuseDB();
-        muse.launch();
+    public void listSongs(List<File> list){
+        for (File f : list){
+            SongButton b = new SongButton();
+            b.setText(f.getName());
+            song_listing.getChildren().add(b);
+        }
     }
+    public class SongButton extends Button{
+        
+        public SongButton(){
+            setOnAction(
+                new EventHandler<ActionEvent>() {
+                    @Override 
+                    public void handle(ActionEvent e) {
+                        File f = FileCoordinator.song_table.get(getText());
+                        player.selectSong(f);
+                    }
+                }
+            );
+        }
+    }
+    
     
 }
