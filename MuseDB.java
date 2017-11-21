@@ -48,7 +48,11 @@ public class MuseDB extends Application {
         root.setLeft(control_panel);
         
         song_listing = new VBox();
-        root.setCenter(song_listing);
+        //root.setCenter(song_listing);
+        
+        ScrollPane sp = new ScrollPane();
+        sp.setContent(song_listing);
+        root.setCenter(sp);
         
         // **** File Import *** // 
         FileChooser file_chooser = new FileChooser();
