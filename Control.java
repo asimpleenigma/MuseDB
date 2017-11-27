@@ -23,15 +23,6 @@ public class Control {
         this.muse = muse;
     }
     
-    public static void importMedia(){
-        FileChooser file_chooser = new FileChooser();
-     //   List<File> list = file_chooser.showOpenMultipleDialog(stage);
-       // file_chooser.importFiles(list);
-
-      //  muse.organizer.setMedium(muse.organizer.current_medium);
-       // muse.updateDisplay();//sp.setContent(view.libraryDisplay());
-    }
-    
     public void setListing(String listing_name){
         muse.org.setListing(listing_name);
         muse.updateDisplay();
