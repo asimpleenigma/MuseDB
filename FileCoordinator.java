@@ -15,31 +15,50 @@ import javafx.scene.media.MediaPlayer;
 import javafx.collections.ObservableMap;
 import java.nio.file.StandardCopyOption;
 import java.io.*;
+import javafx.application.Platform;
 /**
  *
  * @author Lloyd Cloer
  */
 public class FileCoordinator {
+    MuseDB muse;
     public String root_file_path = "";
-    public static Hashtable<String, File> song_table = new Hashtable<String, File>();
+ //   public static Hashtable<String, File> song_table = new Hashtable<String, File>();
     private Queue<MediaPlayer> import_queue;  // = new LinkedList<MediaPlayer>();
+    private Queue<String> path_queue;
     private Timer timer;
     private TimerTask check_imports;
+   // private MakeShiftDatabase db_coordinator;
+    private boolean isImporting;
     
     
-    public FileCoordinator(){
+    public FileCoordinator(MuseDB muse){
+        this.muse = muse;
         import_queue = new LinkedList<MediaPlayer>();
+        path_queue = new LinkedList<String>();
         timer = new Timer();
-        check_imports = new TimerTask(){
+        check_imports = new TimerTask(){   // Checks to see if media is ready with song metadata, transfers to DB if so.
             public void run(){
                 if (import_queue.peek()==null){
+                    
+       //             isImporting = false;
+                    Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    muse.updateDisplay();                              
+                                }
+                            });
+                //    
                     timer.cancel();
                     return;
                 }
                 // queue not empty
                 if (import_queue.peek().getStatus() != MediaPlayer.Status.READY) return;
                 // queue head ready
-                System.out.println(extractMetadata(import_queue.poll()));
+                Hashtable ht = extractMetadata(import_queue.poll());
+                ht.put("file path", path_queue.poll()); // add file path to metadata
+                System.out.println(ht);
+                muse.db.addMusic(ht); // add music to library
             }
         };
     }
@@ -56,29 +75,21 @@ public class FileCoordinator {
     
     public void importFiles(List<File> new_files){
         //if (import_queue)
+    //    isImporting = true;
         for (File f : new_files){
-            song_table.put(f.getName(), f);
-            //putMetadata(extractMetadata(f));
-        //    System.out.println(f.getName());
-            //System.out.println()
-          //  System.out.println(extractMetadata(f));
+            //System.out.println(f.getAbsolutePath());
+            //song_table.put(f.getName(), f);
        
             
             Media media = new Media(f.toURI().toString());
             MediaPlayer media_player = new MediaPlayer(media);
             import_queue.add(media_player);
+            path_queue.add(f.getAbsolutePath());
             System.out.println();
         }
         timer.scheduleAtFixedRate(check_imports, 100l, 100l);
         
     }
-    /*
-    public static ObservableMap extractMetadata(File file){
-        Media media = new Media(file.toURI().toString());
-        MediaPlayer media_player = new MediaPlayer(media);
-        System.out.println(media_player.getStatus());
-        return media.getMetadata();
-    }*/
     
     public static Hashtable extractMetadata(MediaPlayer mp){
         Media media = mp.getMedia();
@@ -87,7 +98,6 @@ public class FileCoordinator {
         for (Object s : om.keySet()){
             ht.put(s, om.get(s));
         }
-        ht.put("file path", media.getSource());
         return ht;
     }
     
@@ -95,15 +105,25 @@ public class FileCoordinator {
         File target = new File(destination + source.getName());
         try {
             Files.copy(source.toPath(), target.toPath());
+            System.out.println("copied");
         } catch (IOException ex){
             ex.printStackTrace();
             System.out.println("Exception: " + ex.getMessage());
         }
-        
     }
- /*   public static void exportSongs(List<File> files, String destination){
-        for(File file : files) {
-            
+    
+    public void exportPlaylist(String playlist_name, File dest_dir){
+        dest_dir = new File(dest_dir.getAbsolutePath()+"\\"+playlist_name);
+        if (!dest_dir.exists()){
+            dest_dir.mkdir();
         }
-    }*/
+        for (int songID : muse.db.getPlaylist(playlist_name)){
+            String source_path = (String) muse.db.getSong(songID).get("file path");
+            File file = new File(source_path);
+            
+            String dest = dest_dir.getAbsolutePath()+"\\"+file.getName();
+            FileCoordinator.copyFile(file, dest);
+        }
+            
+    }
 }
