@@ -69,7 +69,7 @@ public class DB {
 	    	System.out.println("Making Table...");
 	        stmt = c.createStatement();
 	        String sql = "CREATE TABLE MUSIC" +
-	                       "(ID 	INT PRIMARY KEY  NOT NULL AUTO_INCREMENT   ," +
+	                       "(ID    INTEGER PRIMARY KEY AUTOINCREMENT," +
 	                       " ARTIST 	CHAR(50)     ," +
 	                       " SONG_NAME         CHAR(50)    , " + 
 	                       " ALBUM_NAME           CHAR(50)	, " + 
@@ -110,7 +110,7 @@ public class DB {
 	    	System.out.println("Making Table...");
 	        stmt = c.createStatement();
 	        String sql = "CREATE TABLE VIDEOS" +
-	                       "(ID 	INT PRIMARY KEY   NOT NULL AUTO_INCREMENT ," +
+	                       "(ID 	INTEGER PRIMARY KEY AUTOINCREMENT ," +
 	                       " TITLE 	CHAR(50)     ," +
 	                       " VIDEO_PATH  CHAR(50))"; 
 	        stmt.executeUpdate(sql);
@@ -433,13 +433,7 @@ public class DB {
 		    stmt = c.createStatement();
 		    ResultSet rs = stmt.executeQuery(sql);
 		    
-		    if(!rs.next())
-		    {
-		      // do stuff when no rows prsent.
-		    	System.out.println("This Library is empty");
-		    }else
-		    {
-		       
+		       System.out.println("here");
 			       //Query DB for metadata
 			       //Return as HASH table
 		      while ( rs.next() ) {
@@ -450,7 +444,13 @@ public class DB {
 		           String  albumName = rs.getString("album_name");
 		           String genre = rs.getString("genre");
 		           
-		           library.put("id", song_id);
+		           System.out.println("Path: " + songPath );
+		           System.out.println("Artist: " + artist);
+		           System.out.println("Song: " + song);
+		           System.out.println("Album: " + albumName);
+		           System.out.println("ID: " + song_id);
+		           
+		           library.put(song_id, song_id);
 		           library.put("artist", artist);
 		           library.put("song", song);
 		           library.put("album", albumName);
@@ -460,7 +460,7 @@ public class DB {
 			    rs.close();
 			    stmt.close();
 			    c.close();
-		    }
+		    
 	
 	      
 	   }
@@ -499,7 +499,7 @@ public class DB {
 		           String  title =  rs.getString("title");
 
 		           
-		           video_library.put("id", video_id);
+		           video_library.put(video_id, video_id);
 		           video_library.put("path", videoPath);
 		           video_library.put("title", title);
 
@@ -574,11 +574,12 @@ public class DB {
     }
     
     //Retrieve song
-    public Object getSong(int id){
+    public static Object getSong(int song_id){
     	Hashtable library = new Hashtable();
     	library = DB.getMusicLibrary();
+    	System.out.println(library.get(song_id));
     	
-    	return library.get(id);
+    	return library.get("id");
     }
     
     //Retrieve song
