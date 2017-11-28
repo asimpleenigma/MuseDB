@@ -30,6 +30,7 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 public class DB {
 	private int songId;
 	private int videoId;
+	public String import_root;
    static Connection connect() {
         // SQLite connection string
     	
@@ -225,7 +226,7 @@ public class DB {
 
 		         stmt = c.createStatement();
 		         //SQL statement to put the values into the table
-		         String sql = "INSERT INTO MUSIC (ID,TITLE,VIDEO_PATH) " +
+		         String sql = "INSERT INTO VIDEOS (ID,TITLE,VIDEO_PATH) " +
 		        		 "VALUES ('"+title+"', '"+filePath+"' );"; 
 		         stmt.executeUpdate(sql);
 
@@ -243,43 +244,6 @@ public class DB {
 		      
     }
 
-    
-    public static void addToFavorites(Hashtable hashtable){
-       Connection c = DB.connect();
-       Hashtable data = new Hashtable();
-  	   data = hashtable;
-  	   //Get the return value from the file-coordinator function as a hashtable
-  	   Object artist, album, title, genre, filePath;
-  	   artist = data.get("artist");
-  	   album =  data.get("album");
-  	   title =  data.get("title");
-  	   genre = data.get("genre");
-  	   filePath = data.get("file path");
-    	try {
-	         Class.forName("org.sqlite.JDBC");
-	         c = DriverManager.getConnection("jdbc:sqlite:muse.db");
-	         c.setAutoCommit(false);
-	         System.out.println("Opened database successfully");
-	         Statement stmt = null;
-
-	         stmt = c.createStatement();
-	         String sql = "INSERT INTO FAVORITES (ARTIST,SONG_NAME,SONG_PATH,ALBUM_NAME,GENRE) " +
-	        		 "VALUES ('"+artist+"', '"+title+"', '"+filePath+"', '"+album+"', '"+genre+"' );"; 
-	         stmt.executeUpdate(sql);
-
-	        
-
-	         stmt.close();
-	         c.commit();
-	         c.close();
-	      } catch ( Exception e ) {
-	         System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-	         System.exit(0);
-	      }
-	      System.out.println("Favorites Playlist updated");
-	      
-    }
-   
    
    //By default there will already be a favorites table made 
     public static void makeFavoritesTable(){
@@ -630,6 +594,13 @@ public class DB {
     	String songName = name;
     }
     
+    public void setImportRoot(String path){
+        this.import_root = path;
+    }
+    
+    public String getImportRoot(){
+        return this.import_root;
+    }
  
 	public static void main( String args[] ) {
 		
