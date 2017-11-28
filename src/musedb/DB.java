@@ -579,7 +579,7 @@ public class DB {
     	library = DB.getMusicLibrary();
     	System.out.println(library.get(song_id));
     	
-    	return library.get("id");
+    	return library.get(song_id);
     }
     
     //Retrieve song
